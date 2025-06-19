@@ -1,0 +1,182 @@
+using System;
+using System.IO;
+using System.Threading;
+
+namespace Pacman
+{
+    internal class Program
+    {
+        static char[,] map;
+        static int pacmanRow;
+        static int pacmanCol;
+        static bool canMove = true;
+
+        static void Main(string[] args)
+        {
+            LoadMap("map.txt");
+
+            Ghost ghost = new Ghost(4, 4, ConsoleColor.Red, '@');
+
+            while (true)
+            {
+                Console.Clear();
+                DrawMap();
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                if (canMove)
+                {
+                    MovePacman(key);
+                    ghost.Move(map, pacmanRow, pacmanCol,ref canMove);
+                }
+
+                if (AllDotsEaten())
+                {
+                    Console.WriteLine("Вы выиграли");
+                    break;
+                }
+
+                Thread.Sleep(100);
+            }
+        }
+
+        static void LoadMap(string filename)
+        {
+            string[] lines = File.ReadAllLines(filename);
+            map = new char[lines.Length, lines[0].Length];
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                for (int j = 1; j < lines[i].Length; j++)
+                {
+                    map[i, j] = lines[i][j];
+                    if (lines[i][j] == '<')
+                    {
+                        pacmanRow = i;
+                        pacmanCol = j;
+                    }
+                }
+            }
+        }
+
+        static void DrawMap()
+        {
+            for (int i = 1; i < map.GetLength(0); i++)
+            {
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    Console.Write(map[i, j]);
+                }
+                Console.WriteLine();
+            }
+        }
+
+        static void MovePacman(ConsoleKeyInfo key)
+        {
+            int newRow = pacmanRow;
+            int newCol = pacmanCol;
+
+            switch (key.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    newRow--;
+                    break;
+                case ConsoleKey.DownArrow:
+                    newRow++;
+                    break;
+                case ConsoleKey.LeftArrow:
+                    newCol--;
+                    break;
+                case ConsoleKey.RightArrow:
+                    newCol++;
+                    break;
+            }
+
+            if (!IsWall(newRow, newCol))
+            {
+                map[pacmanRow, pacmanCol] = ' ';
+                pacmanRow = newRow;
+                pacmanCol = newCol;
+                map[pacmanRow, pacmanCol] = '<';
+            }
+        }
+
+        static bool IsWall(int row, int col)
+        {
+            return map[row, col] == '#';
+        }
+
+        static bool AllDotsEaten()
+        {
+            for (int i = 0; i < map.GetLength(0); i++)
+            {
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    if (map[i, j] == '.')
+                        return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    internal class Ghost
+    {
+        public int Row { get; private set; }
+        public int Col { get; private set; }
+
+        private ConsoleColor Color;
+        private char Symbol;
+        private int PacmanRow;
+        private int PacmanCol;
+
+        public Ghost(int row, int col, ConsoleColor color, char symbol)
+        {
+            Row = row;
+            Col = col;
+            Color = color;
+            Symbol = symbol;
+        }
+
+        public void Move(char[,] map, int pacmanRow, int pacmanCol, ref bool canMove)
+        {
+            PacmanRow = pacmanRow;
+            PacmanCol = pacmanCol;
+
+            int dx = PacmanCol - Col;
+            int dy = PacmanRow - Row;
+
+            int newRow = Row;
+            int newCol = Col;
+
+            if (Math.Abs(dx) > Math.Abs(dy))
+            {
+                newCol += Math.Sign(dx);
+            }
+            else
+            {
+                newRow += Math.Sign(dy);
+            }
+
+            if (IsValidMove(newRow, newCol, map))
+            {
+                map[Row, Col] = ' ';
+                Row = newRow;
+                Col = newCol;
+                map[Row, Col] = Symbol;
+            }
+
+            if (Row == PacmanRow && Col == PacmanCol)
+            {
+                Console.WriteLine("Призрак поймал Пакмэна!");
+                canMove = false;
+            }
+        }
+
+        private bool IsValidMove(int row, int col, char[,] map)
+        {
+            if (row < 0 || row >= map.GetLength(0) || col < 0 || col >= map.GetLength(1))
+                return false;
+            return map[row, col] != '#';
+        }
+    }
+}
