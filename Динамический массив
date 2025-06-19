@@ -1,0 +1,133 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Динамический_массив
+{
+    internal class Program
+    {
+        private const string ComandDelete = "удалить";
+        private const string ComandSort = "сортировать";
+        private const string ComandRandom = "перемешать";
+        private const string ComandExit = "выход";
+
+        static void Main(string[] args)
+        {
+            int[] numbers = new int[0];
+            bool isStart = true;
+
+            while (isStart)
+            {
+                Console.Clear();
+
+                Console.WriteLine("Чтобы отсортировать введите 'сортировать'");
+                Console.WriteLine("Чтобы удалить введите 'удалить'");
+                Console.WriteLine("Чтобы перемешать введите 'перемешать'");
+                Console.WriteLine("Чтобы выйти введите 'выход'");
+
+                PrintArray(numbers);
+
+                string comandUser = Console.ReadLine();
+
+                switch (comandUser)
+                {
+                    case ComandDelete:
+                        Console.Write("Введите номер элемента для удаления: ");
+                        int deleteIndex;
+                        if (int.TryParse(Console.ReadLine(), out deleteIndex) && deleteIndex >= 0 && deleteIndex < numbers.Length)
+                        {
+                            numbers = DeleteNumberArray(numbers, deleteIndex);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Некорректный индекс");
+                        }
+                        break;
+
+                    case ComandSort:
+                        numbers = SortNumberArray(numbers);
+                        Console.WriteLine("Массив отсортирован");
+                        break;
+
+                    case ComandRandom:
+                        numbers = RandomNumberArray(numbers);
+                        Console.WriteLine("Массив перемешан");
+                        break;
+
+                    case ComandExit:
+                        isStart = false;
+                        break;
+
+                    default:
+                        if (int.TryParse(comandUser, out int number))
+                        {
+                            numbers = AddNumberArray(number, numbers);
+                            Console.WriteLine("Число добавлено в массив");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Неизвестная команда");
+                        }
+                        break;
+                }
+            }
+        }
+
+        static void PrintArray(int[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                Console.Write($"{array[i]} ");
+            }
+            Console.WriteLine();
+        }
+
+        static int[] RandomNumberArray(int[] numbers)
+        {
+            var random = new Random();
+            int n = numbers.Length;
+            int[] array = (int[])numbers.Clone();
+            while (n > 1)
+            {
+                int k = random.Next(n--);
+                (array[n], array[k]) = (array[k], array[n]);
+            }
+            return array;
+        }
+
+        static int[] SortNumberArray(int[] numbers)
+        {
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                for (int j = 0; j < numbers.Length - 1; j++)
+                {
+                    if (numbers[j] > numbers[j + 1])
+                    {
+                        int tempNumber = numbers[j];
+                        numbers[j] = numbers[j + 1];
+                        numbers[j + 1] = tempNumber;
+                    }
+                }
+            }
+            return numbers;
+        }
+
+        static int[] AddNumberArray(int number, int[] array)
+        {
+            int[] newArray = new int[array.Length + 1];
+            array.CopyTo(newArray, 0);
+            newArray[array.Length] = number;
+            return newArray;
+        }
+
+        private static int[] DeleteNumberArray(int[] numbers, int index)
+        {
+            int[] newNumbers = new int[numbers.Length - 1];
+            Array.Copy(numbers, 0, newNumbers, 0, index);
+            Array.Copy(numbers, index + 1, newNumbers, index, numbers.Length - index - 1);
+            return newNumbers;
+        }
+    }
+}
