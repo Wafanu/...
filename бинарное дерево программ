@@ -1,0 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace бинарное_дерево
+{
+    internal class Program // Определяем внутренний класс Program, который является точкой входа в приложение.
+    {
+        static void Main(string[] args) // Определяем статический метод Main, который является точкой входа в программу.
+        {
+            Management tree = new Management(); // Создаем новый экземпляр класса Management
+            tree.Start(); // Вызываем метод Start у экземпляра tree, который, запускает работу с бинарным деревом.
+        }
+    }
+}
